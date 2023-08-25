@@ -26,7 +26,7 @@ namespace StackTracerTests.Controllers
 
         private void DoSleep()
         {
-            Thread.Sleep(10000);
+            Thread.Sleep(60000);
         }
     }
 }
