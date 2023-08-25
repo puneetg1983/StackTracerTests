@@ -12,7 +12,11 @@ namespace StackTracerTests
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-            routes.MapRoute("Default", "{controller}/{action}/{id}", new { controller = "Values", action = "Get", id = UrlParameter.Optional });
+
+            routes.MapRoute(
+                name: "Default",
+                url: "index.html"
+            );
         }
     }
 }
