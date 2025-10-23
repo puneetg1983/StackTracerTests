@@ -18,6 +18,8 @@ namespace StackTracerTests.Controllers
 
     public class StackTracerController : ApiController
     {
+        private const string WebSiteDaasExtensionPath = "WEBSITE_DAAS_EXTENSIONPATH";
+
         [HttpGet]
         [ActionName("invoke")]
         public StackTracerInvocationOutput Get()
@@ -81,7 +83,7 @@ namespace StackTracerTests.Controllers
 
         private StackTracerInvocationOutput LaunchProcess(int processId, string outputFile)
         {
-            string stackTracerPath = Environment.ExpandEnvironmentVariables("%ProgramFiles%\\IIS\\Microsoft Web Hosting Framework\\DWASMod\\stacktracer\\stacktracer.exe");
+            string stackTracerPath = GetStackTracerPath(is64Bit: true);
             string args = string.Format("-p:{0} -o:{1}", processId, outputFile);
             StackTracerInvocationOutput output = new StackTracerInvocationOutput();
             StringBuilder stringBuilder = new StringBuilder();
@@ -122,6 +124,23 @@ namespace StackTracerTests.Controllers
                 output.ElapsedMilliseconds = watch.ElapsedMilliseconds;
             }
             return output;
+        }
+
+        private static string GetStackTracerPath(bool is64Bit = true)
+        {
+            string daasInstallationPath = Environment.GetEnvironmentVariable(WebSiteDaasExtensionPath);
+            if (!string.IsNullOrWhiteSpace(daasInstallationPath))
+            {
+                string bitnessDirectory = is64Bit ? "x64" : "x86";
+                string fullPath = Path.Combine(daasInstallationPath, "PlatformTools", "StackTracer", bitnessDirectory, "StackTracer.exe");
+
+                if (File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
+
+            return string.Empty;
         }
 
     }
