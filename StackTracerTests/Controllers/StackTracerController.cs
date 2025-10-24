@@ -41,12 +41,7 @@ namespace StackTracerTests.Controllers
 
             validationOutput.IsSuccess = true;
 
-            StackTracerEntry stackTrace = output.StackTrace.FirstOrDefault();
-            if (stackTrace == null)
-            {
-                return validationOutput;
-            }
-
+            StackTracerEntry stackTrace = output.StackTrace;
             if (stackTrace.ProcessId != Process.GetCurrentProcess().Id)
             {
                 return validationOutput;
@@ -65,8 +60,8 @@ namespace StackTracerTests.Controllers
             {
                 if (stack.CallStack.Any(stackFrame => stackFrame.StartsWith("System.Threading.Thread.Sleep")) 
                     && stack.CallStack.Any(stackFrame => stackFrame.StartsWith("StackTracerTests.Controllers.SleepController.DoSleep")))
-                {
-                    validationOutput.IsStackTraceMatching = true;
+            {
+                validationOutput.IsStackTraceMatching = true;
                     break;
                 }
             }
@@ -83,7 +78,7 @@ namespace StackTracerTests.Controllers
 
         private StackTracerInvocationOutput LaunchProcess(int processId, string outputFile)
         {
-            string stackTracerPath = GetStackTracerPath(is64Bit: true);
+            string stackTracerPath = GetStackTracerPath(is64Bit: Environment.Is64BitProcess);
             string args = string.Format("-p:{0} -o:{1}", processId, outputFile);
             StackTracerInvocationOutput output = new StackTracerInvocationOutput();
             StringBuilder stringBuilder = new StringBuilder();
@@ -109,7 +104,9 @@ namespace StackTracerTests.Controllers
             stackTracerProcess.WaitForExit();
             stackTracerProcess.CancelOutputRead();
             watch.Stop();
-            StackTracerEntry[] stackTraces = JsonConvert.DeserializeObject<StackTracerEntry[]>(File.ReadAllText(outputFile));
+
+            var fileContents = File.ReadAllText(outputFile);
+            StackTracerEntry stackTrace = JsonConvert.DeserializeObject<StackTracerEntry>(fileContents);
             if (!File.Exists(outputFile))
             {
                 output.IsSuccess = false;
@@ -119,7 +116,7 @@ namespace StackTracerTests.Controllers
             else
             {
                 output.IsSuccess = true;
-                output.StackTrace = stackTraces;
+                output.StackTrace = stackTrace;
                 output.Output = stringBuilder.ToString().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
                 output.ElapsedMilliseconds = watch.ElapsedMilliseconds;
             }

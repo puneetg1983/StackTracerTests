@@ -145,6 +145,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Properties\PublishProfiles\demowebcampnew1234 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\StackTracerTest20230822191209 - Web Deploy.pubxml" />
   </ItemGroup>
   <PropertyGroup>
